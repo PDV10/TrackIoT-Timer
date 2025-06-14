@@ -1,9 +1,7 @@
-// components/SplashScreen.tsx
 import { Box, Image } from "@chakra-ui/react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const MotionBox = motion(Box);
-const MotionImage = motion(Image);
 
 type Props = {
 	isVisible: boolean;
@@ -23,22 +21,25 @@ export default function SplashScreen({ isVisible }: Props) {
 					display="flex"
 					alignItems="center"
 					justifyContent="center"
-					bg="rgba(255, 255, 255, 0.9)"
+					bg="rgba(255, 255, 255, 0.95)"
 					backdropFilter="blur(25px)"
-					initial={{ opacity: 1 }}
-					animate={{ opacity: 1 }}
-					exit={{ opacity: 0 }}
-					transition={{ duration: 2.5, ease: "easeInOut" }}
+					initial={{ scale: 1, opacity: 1 }}
+					animate={{
+						scale: [1, 10, 1000],
+						opacity: [1, 1, 0],
+					}}
+					transition={{
+						duration: 4.5,
+						ease: "easeIn",
+						times: [0, 0.6, 1],
+					}}
+					pointerEvents="none"
 				>
-					<MotionImage
+					<Image
 						src="/assets/trackiot_logo.png"
 						alt="Logo"
-						boxSize="140px"
+						boxSize="120px"
 						objectFit="contain"
-						initial={{ scale: 1 }}
-						animate={{ scale: 2000 }}
-						exit={{ opacity: 0 }}
-						transition={{ duration: 10, ease: "easeIn" }}
 					/>
 				</MotionBox>
 			)}

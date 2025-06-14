@@ -8,7 +8,7 @@ export default function useApp() {
 	useEffect(() => {
 		const timeout = setTimeout(() => {
 			setIsSplashVisible(false);
-		}, 1800); // duración igual a la transición
+		}, 4500); // duración igual a la transición inicial
 
 		return () => clearTimeout(timeout);
 	}, []);
