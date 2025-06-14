@@ -1,159 +1,164 @@
-// App.tsx
-import { useEffect, useState } from "react";
 import {
-  Box,
-  Button,
-  Flex,
-  Input,
-  VStack,
-  useDisclosure,
-  Heading,
+	Box,
+	Button,
+	Flex,
+	Input,
+	VStack,
+	Heading,
+	Image,
 } from "@chakra-ui/react";
 import { FaPlay } from "react-icons/fa";
 import DualProgressPanel from "./components/DualProgressPanel";
 import SummaryModal from "./components/SummaryModal";
-
+import useApp from "./hooks/useApp";
+import SplashScreen from "./components/SplashScreen";
 function App() {
-  const [duration, setDuration] = useState(60);
-  const [maxMoney, setMaxMoney] = useState(10000);
-  const [isGlobalPlaying, setIsGlobalPlaying] = useState(false);
+	const {
+		durationInput,
+		maxMoneyInput,
+		isDurationInvalid,
+		isMoneyInvalid,
+		isGlobalPlaying,
+		panel1Paused,
+		panel2Paused,
+		panel1Time,
+		panel2Time,
+		panel1Money,
+		panel2Money,
+		reset,
+		isOpen,
+		maxMoney,
+		duration,
+		isSplashVisible,
+		setDurationInput,
+		setMaxMoneyInput,
+		setPanel1Paused,
+		setPanel2Paused,
+		handlePlay,
+		setReset,
+		resetAll,
+		onClose,
+	} = useApp();
 
-  const [panel1Paused, setPanel1Paused] = useState(false);
-  const [panel2Paused, setPanel2Paused] = useState(false);
+	return (
+		<>
+			<SplashScreen isVisible={isSplashVisible} />
+			<Box p={{ base: 4, md: 2 }} bg="gray.100" minH="100vh">
+				<Flex justify="flex-start" mb={6}>
+					<Image
+						src="./assets/trackiot_logo.png"
+						alt="Logo TrackIoT"
+						height="12"
+						objectFit="contain"
+					/>
+				</Flex>
+				<VStack spacing={8} maxW="1280px" mx="auto">
+					<Heading size="lg" color="gray.700" textAlign="center">
+						Comparador de Progreso
+					</Heading>
 
-  const [panel1Time, setPanel1Time] = useState(0);
-  const [panel2Time, setPanel2Time] = useState(0);
+					<Flex
+						gap={6}
+						direction={{ base: "column", md: "row" }}
+						width="100%"
+						justifyContent="space-between"
+					>
+						<DualProgressPanel
+							label="Panel 1"
+							duration={duration}
+							maxMoney={maxMoney}
+							currentTime={panel1Time}
+							currentMoney={panel1Money}
+							isPaused={panel1Paused}
+							isRunning={isGlobalPlaying && !panel1Paused}
+							onPauseToggle={() => setPanel1Paused((prev) => !prev)}
+						/>
 
-  const [panel1Money, setPanel1Money] = useState(0);
-  const [panel2Money, setPanel2Money] = useState(0);
+						<DualProgressPanel
+							label="Panel 2"
+							duration={duration}
+							maxMoney={maxMoney}
+							currentTime={panel2Time}
+							currentMoney={panel2Money}
+							isPaused={panel2Paused}
+							isRunning={isGlobalPlaying && !panel2Paused}
+							onPauseToggle={() => setPanel2Paused((prev) => !prev)}
+						/>
+					</Flex>
 
-  const { isOpen, onOpen, onClose } = useDisclosure();
+					<Flex
+						direction={{ base: "column", md: "row" }}
+						gap={4}
+						w="100%"
+						align="center"
+						justify="center"
+						flexWrap="wrap"
+					>
+						<Input
+							placeholder="Duración (segundos)"
+							type="number"
+							value={durationInput}
+							onChange={(e) => setDurationInput(e.target.value)}
+							isInvalid={isDurationInvalid}
+							variant="filled"
+							bg="white"
+							w={{ base: "100%", md: "33%" }}
+							rounded="md"
+						/>
 
-  const tick = 100; // ms
+						<Input
+							placeholder="Dinero máximo"
+							type="number"
+							value={maxMoneyInput}
+							onChange={(e) => setMaxMoneyInput(e.target.value)}
+							isInvalid={isMoneyInvalid}
+							variant="filled"
+							bg="white"
+							w={{ base: "100%", md: "33%" }}
+							rounded="md"
+						/>
 
-  const resetAll = () => {
-    setIsGlobalPlaying(false);
-    setPanel1Paused(false);
-    setPanel2Paused(false);
-    setPanel1Time(0);
-    setPanel2Time(0);
-    setPanel1Money(0);
-    setPanel2Money(0);
-  };
+						{reset ? (
+							<Button
+								onClick={() => {
+									resetAll();
+									setReset(false);
+								}}
+								colorScheme="red"
+								size="lg"
+								w={{ base: "100%", md: "33%" }}
+								shadow="md"
+							>
+								Reiniciar
+							</Button>
+						) : (
+							<Button
+								onClick={handlePlay}
+								colorScheme="teal"
+								size="lg"
+								w={{ base: "100%", md: "33%" }}
+								leftIcon={<FaPlay />}
+								isDisabled={isGlobalPlaying}
+								shadow="md"
+							>
+								Iniciar ambos procesos
+							</Button>
+						)}
+					</Flex>
 
-  useEffect(() => {
-    let timer1: number | null = null;
-    if (isGlobalPlaying && !panel1Paused && panel1Time < duration) {
-      timer1 = window.setInterval(() => {
-        setPanel1Time((prev) => Math.min(prev + tick / 1000, duration));
-        setPanel1Money((prev) => Math.min(prev + (maxMoney / duration) * (tick / 1000), maxMoney));
-      }, tick);
-    }
-    return () => clearInterval(timer1!);
-  }, [isGlobalPlaying, panel1Paused, panel1Time]);
-
-  useEffect(() => {
-    let timer2: number | null = null;
-    if (isGlobalPlaying && !panel2Paused && panel2Time < duration) {
-      timer2 = window.setInterval(() => {
-        setPanel2Time((prev) => Math.min(prev + tick / 1000, duration));
-        setPanel2Money((prev) => Math.min(prev + (maxMoney / duration) * (tick / 1000), maxMoney));
-      }, tick);
-    }
-    return () => clearInterval(timer2!);
-  }, [isGlobalPlaying, panel2Paused, panel2Time]);
-
-  useEffect(() => {
-    const panel1Finalizado = panel1Paused || panel1Time >= duration;
-    const panel2Finalizado = panel2Paused || panel2Time >= duration;
-
-    if (isGlobalPlaying && panel1Finalizado && panel2Finalizado && !isOpen) {
-      onOpen();
-    }
-  }, [panel1Paused, panel2Paused, panel1Time, panel2Time]);
-
-  const handlePlay = () => {
-    setIsGlobalPlaying(true);
-  };
-
-  return (
-    <Box p={{ base: 4, md: 8 }} bg="gray.100" minH="100vh">
-      <VStack spacing={6} maxW="1280px" mx="auto">
-        <Heading size="lg" color="gray.700" textAlign="center">
-          Comparador de Progreso
-        </Heading>
-
-        <Flex gap={4} flexWrap="wrap" w="100%">
-          <Input
-            placeholder="Duración (segundos)"
-            type="number"
-            value={duration}
-            onChange={(e) => setDuration(Number(e.target.value))}
-            variant="filled"
-            bg="white"
-            size="md"
-            rounded="md"
-          />
-          <Input
-            placeholder="Dinero máximo"
-            type="number"
-            value={maxMoney}
-            onChange={(e) => setMaxMoney(Number(e.target.value))}
-            variant="filled"
-            bg="white"
-            size="md"
-            rounded="md"
-          />
-        </Flex>
-
-        <Button
-          onClick={handlePlay}
-          colorScheme="teal"
-          size="lg"
-          px={10}
-          leftIcon={<FaPlay />}
-          isDisabled={isGlobalPlaying}
-          shadow="md"
-        >
-          Iniciar ambos procesos
-        </Button>
-
-        <Flex gap={6} direction={{ base: "column", md: "row" }} width="100%" justifyContent="space-between">
-          <DualProgressPanel
-            label="Panel 1"
-            duration={duration}
-            maxMoney={maxMoney}
-            currentTime={panel1Time}
-            currentMoney={panel1Money}
-            isPaused={panel1Paused}
-            isRunning={isGlobalPlaying && !panel1Paused}
-            onPauseToggle={() => setPanel1Paused((prev) => !prev)}
-          />
-
-          <DualProgressPanel
-            label="Panel 2"
-            duration={duration}
-            maxMoney={maxMoney}
-            currentTime={panel2Time}
-            currentMoney={panel2Money}
-            isPaused={panel2Paused}
-            isRunning={isGlobalPlaying && !panel2Paused}
-            onPauseToggle={() => setPanel2Paused((prev) => !prev)}
-          />
-        </Flex>
-
-        <SummaryModal
-          isOpen={isOpen}
-          onClose={() => {
-            onClose();
-            resetAll();
-          }}
-          panel1={{ time: panel1Time, money: panel1Money }}
-          panel2={{ time: panel2Time, money: panel2Money }}
-        />
-      </VStack>
-    </Box>
-  );
+					<SummaryModal
+						isOpen={isOpen}
+						onClose={() => {
+							onClose();
+							setReset(true);
+						}}
+						panel1={{ time: panel1Time, money: panel1Money }}
+						panel2={{ time: panel2Time, money: panel2Money }}
+					/>
+				</VStack>
+			</Box>
+		</>
+	);
 }
 
 export default App;
