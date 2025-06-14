@@ -78,7 +78,6 @@ export default function App() {
 							maxMoney={panel1Config.maxMoney}
 							currentTime={panel1Time}
 							currentMoney={panel1Money}
-							isPaused={panel1Paused}
 							isRunning={playFirst && !panel1Paused}
 							hasStarted={panel1Time > 0}
 							onPauseToggle={() =>
@@ -92,7 +91,6 @@ export default function App() {
 							maxMoney={panel2Config.maxMoney}
 							currentTime={panel2Time}
 							currentMoney={panel2Money}
-							isPaused={panel2Paused}
 							isRunning={playSecond && !panel2Paused}
 							hasStarted={panel2Time > 0}
 							onPauseToggle={() =>

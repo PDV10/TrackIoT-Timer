@@ -16,7 +16,6 @@ type Props = {
 	maxMoney: number;
 	currentTime: number;
 	currentMoney: number;
-	isPaused: boolean;
 	isRunning: boolean;
 	hasStarted: boolean;
 	onPauseToggle: () => void;
@@ -28,7 +27,6 @@ export default function DualProgressPanel({
 	maxMoney,
 	currentTime,
 	currentMoney,
-	isPaused,
 	isRunning,
 	hasStarted,
 	onPauseToggle,
