@@ -1,3 +1,4 @@
+// components/DualProgressPanel.tsx
 import {
 	Box,
 	Button,
@@ -17,6 +18,7 @@ type Props = {
 	currentMoney: number;
 	isPaused: boolean;
 	isRunning: boolean;
+	hasStarted: boolean;
 	onPauseToggle: () => void;
 };
 
@@ -28,8 +30,12 @@ export default function DualProgressPanel({
 	currentMoney,
 	isPaused,
 	isRunning,
+	hasStarted,
 	onPauseToggle,
 }: Props) {
+	const progressTime = duration > 0 ? (currentTime / duration) * 100 : 0;
+	const progressMoney = maxMoney > 0 ? (currentMoney / maxMoney) * 100 : 0;
+
 	return (
 		<Box
 			w={{ base: "100%", md: "50%" }}
@@ -52,7 +58,7 @@ export default function DualProgressPanel({
 					<Flex alignItems="center" gap={4}>
 						<Progress
 							flex="1"
-							value={(currentTime / duration) * 100}
+							value={progressTime}
 							colorScheme="blue"
 							height="20px"
 							rounded="md"
@@ -72,7 +78,7 @@ export default function DualProgressPanel({
 					<Flex alignItems="center" gap={4}>
 						<Progress
 							flex="1"
-							value={(currentMoney / maxMoney) * 100}
+							value={progressMoney}
 							colorScheme="green"
 							height="20px"
 							rounded="md"
@@ -88,12 +94,12 @@ export default function DualProgressPanel({
 				<HStack justifyContent="center" pt={2}>
 					<Button
 						onClick={onPauseToggle}
-						colorScheme={isPaused ? "green" : "red"}
-						leftIcon={isPaused ? <FaPlay /> : <FaPause />}
+						colorScheme={isRunning ? "red" : "green"}
+						leftIcon={isRunning ? <FaPause /> : <FaPlay />}
 						size="md"
 						shadow="sm"
 					>
-						{isPaused ? "Reanudar" : "Pausar"}
+						{isRunning ? "Pausar" : hasStarted ? "Reanudar" : "Iniciar"}
 					</Button>
 				</HStack>
 			</VStack>

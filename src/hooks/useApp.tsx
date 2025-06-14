@@ -1,46 +1,51 @@
+// hooks/useApp.ts
 import { useDisclosure, useToast } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 
 export default function useApp() {
-	// al principio del componente App
 	const [isSplashVisible, setIsSplashVisible] = useState(true);
 
 	useEffect(() => {
-		const timeout = setTimeout(() => {
-			setIsSplashVisible(false);
-		}, 4500); // duración igual a la transición inicial
-
+		const timeout = setTimeout(() => setIsSplashVisible(false), 4500);
 		return () => clearTimeout(timeout);
 	}, []);
 
 	const [durationInput, setDurationInput] = useState("60");
 	const [maxMoneyInput, setMaxMoneyInput] = useState("10000");
 
-	const [duration, setDuration] = useState(60);
-	const [maxMoney, setMaxMoney] = useState(10000);
-	const [isGlobalPlaying, setIsGlobalPlaying] = useState(false);
+	const [panel1Config, setPanel1Config] = useState({
+		duration: 60,
+		maxMoney: 10000,
+	});
+	const [panel2Config, setPanel2Config] = useState({
+		duration: 60,
+		maxMoney: 10000,
+	});
 
-	const [panel1Paused, setPanel1Paused] = useState(false);
-	const [panel2Paused, setPanel2Paused] = useState(false);
+	const [playFirst, setPlayFirst] = useState(false);
+	const [playSecond, setPlaySecond] = useState(false);
+
+	const [panel1Paused, setPanel1Paused] = useState(true);
+	const [panel2Paused, setPanel2Paused] = useState(true);
 
 	const [panel1Time, setPanel1Time] = useState(0);
 	const [panel2Time, setPanel2Time] = useState(0);
-
 	const [panel1Money, setPanel1Money] = useState(0);
 	const [panel2Money, setPanel2Money] = useState(0);
-	const [reset, setReset] = useState(false);
 
+	const [reset, setReset] = useState(false);
 	const [isDurationInvalid, setIsDurationInvalid] = useState(false);
 	const [isMoneyInvalid, setIsMoneyInvalid] = useState(false);
 
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const toast = useToast();
-	const tick = 100; // ms
+	const tick = 100;
 
 	const resetAll = () => {
-		setIsGlobalPlaying(false);
-		setPanel1Paused(false);
-		setPanel2Paused(false);
+		setPlayFirst(false);
+		setPlaySecond(false);
+		setPanel1Paused(true);
+		setPanel2Paused(true);
 		setPanel1Time(0);
 		setPanel2Time(0);
 		setPanel1Money(0);
@@ -49,46 +54,60 @@ export default function useApp() {
 
 	useEffect(() => {
 		let timer1: number | null = null;
-		if (isGlobalPlaying && !panel1Paused && panel1Time < duration) {
+		if (playFirst && !panel1Paused && panel1Time < panel1Config.duration) {
 			timer1 = window.setInterval(() => {
-				setPanel1Time((prev) => Math.min(prev + tick / 1000, duration));
+				setPanel1Time((prev) =>
+					Math.min(prev + tick / 1000, panel1Config.duration),
+				);
 				setPanel1Money((prev) =>
-					Math.min(prev + (maxMoney / duration) * (tick / 1000), maxMoney),
+					Math.min(
+						prev +
+							(panel1Config.maxMoney / panel1Config.duration) * (tick / 1000),
+						panel1Config.maxMoney,
+					),
 				);
 			}, tick);
 		}
 		return () => clearInterval(timer1!);
-	}, [isGlobalPlaying, panel1Paused, panel1Time]);
+	}, [playFirst, panel1Paused, panel1Time, panel1Config]);
 
 	useEffect(() => {
 		let timer2: number | null = null;
-		if (isGlobalPlaying && !panel2Paused && panel2Time < duration) {
+		if (playSecond && !panel2Paused && panel2Time < panel2Config.duration) {
 			timer2 = window.setInterval(() => {
-				setPanel2Time((prev) => Math.min(prev + tick / 1000, duration));
+				setPanel2Time((prev) =>
+					Math.min(prev + tick / 1000, panel2Config.duration),
+				);
 				setPanel2Money((prev) =>
-					Math.min(prev + (maxMoney / duration) * (tick / 1000), maxMoney),
+					Math.min(
+						prev +
+							(panel2Config.maxMoney / panel2Config.duration) * (tick / 1000),
+						panel2Config.maxMoney,
+					),
 				);
 			}, tick);
 		}
 		return () => clearInterval(timer2!);
-	}, [isGlobalPlaying, panel2Paused, panel2Time]);
+	}, [playSecond, panel2Paused, panel2Time, panel2Config]);
 
 	useEffect(() => {
-		const panel1Finalizado = panel1Paused || panel1Time >= duration;
-		const panel2Finalizado = panel2Paused || panel2Time >= duration;
+		const p1Done = panel1Paused || panel1Time >= panel1Config.duration;
+		const p2Done = panel2Paused || panel2Time >= panel2Config.duration;
+		if (playFirst && playSecond && p1Done && p2Done && !isOpen) onOpen();
+	}, [
+		panel1Paused,
+		panel2Paused,
+		panel1Time,
+		panel2Time,
+		panel1Config.duration,
+		panel2Config.duration,
+	]);
 
-		if (isGlobalPlaying && panel1Finalizado && panel2Finalizado && !isOpen) {
-			onOpen();
-		}
-	}, [panel1Paused, panel2Paused, panel1Time, panel2Time]);
-
-	const handlePlay = () => {
+	const validateInputs = () => {
 		const parsedDuration = Number(durationInput);
 		const parsedMoney = Number(maxMoneyInput);
-
 		const durationValid = parsedDuration > 0;
 		const moneyValid = parsedMoney > 0;
-
 		setIsDurationInvalid(!durationValid);
 		setIsMoneyInvalid(!moneyValid);
 
@@ -100,37 +119,67 @@ export default function useApp() {
 				duration: 3000,
 				isClosable: true,
 			});
-			return;
+			return false;
 		}
-
-		setDuration(parsedDuration);
-		setMaxMoney(parsedMoney);
-		setIsGlobalPlaying(true);
+		return true;
 	};
+
+	const startPanel1 = () => {
+		if (!validateInputs()) return;
+		setPanel1Config({
+			duration: Number(durationInput),
+			maxMoney: Number(maxMoneyInput),
+		});
+		setPlayFirst(true);
+		setPanel1Paused(false);
+	};
+
+	const startPanel2 = () => {
+		if (!validateInputs()) return;
+		setPanel2Config({
+			duration: Number(durationInput),
+			maxMoney: Number(maxMoneyInput),
+		});
+		setPlaySecond(true);
+		setPanel2Paused(false);
+	};
+
+	const pauseAll = () => {
+		setPanel1Paused(true);
+		setPanel2Paused(true);
+		setReset(true);
+	};
+
 	return {
 		durationInput,
 		maxMoneyInput,
 		isDurationInvalid,
 		isMoneyInvalid,
-		isGlobalPlaying,
+		playFirst,
+		playSecond,
 		panel1Paused,
 		panel2Paused,
 		panel1Time,
 		panel2Time,
 		panel1Money,
 		panel2Money,
+		panel1Config,
+		panel2Config,
 		reset,
 		isOpen,
-		maxMoney,
-		duration,
 		isSplashVisible,
 		setDurationInput,
 		setMaxMoneyInput,
 		setPanel1Paused,
 		setPanel2Paused,
-		handlePlay,
+		setPlayFirst,
+		setPlaySecond,
 		setReset,
 		resetAll,
 		onClose,
+		validateInputs,
+		startPanel1,
+		startPanel2,
+		pauseAll,
 	};
 }

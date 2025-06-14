@@ -6,19 +6,22 @@ import {
 	VStack,
 	Heading,
 	Image,
+	Text,
 } from "@chakra-ui/react";
-import { FaPlay } from "react-icons/fa";
+import { FaPause } from "react-icons/fa";
 import DualProgressPanel from "./components/DualProgressPanel";
 import SummaryModal from "./components/SummaryModal";
 import useApp from "./hooks/useApp";
 import SplashScreen from "./components/SplashScreen";
-function App() {
+
+export default function App() {
 	const {
 		durationInput,
 		maxMoneyInput,
 		isDurationInvalid,
 		isMoneyInvalid,
-		isGlobalPlaying,
+		playFirst,
+		playSecond,
 		panel1Paused,
 		panel2Paused,
 		panel1Time,
@@ -27,18 +30,24 @@ function App() {
 		panel2Money,
 		reset,
 		isOpen,
-		maxMoney,
-		duration,
+		panel1Config,
+		panel2Config,
 		isSplashVisible,
 		setDurationInput,
 		setMaxMoneyInput,
 		setPanel1Paused,
 		setPanel2Paused,
-		handlePlay,
+		startPanel1,
+		startPanel2,
+		setPlayFirst,
+		setPlaySecond,
+		pauseAll,
 		setReset,
 		resetAll,
 		onClose,
 	} = useApp();
+
+	const bothRunning = playFirst && playSecond;
 
 	return (
 		<>
@@ -65,24 +74,30 @@ function App() {
 					>
 						<DualProgressPanel
 							label="Panel 1"
-							duration={duration}
-							maxMoney={maxMoney}
+							duration={panel1Config.duration}
+							maxMoney={panel1Config.maxMoney}
 							currentTime={panel1Time}
 							currentMoney={panel1Money}
 							isPaused={panel1Paused}
-							isRunning={isGlobalPlaying && !panel1Paused}
-							onPauseToggle={() => setPanel1Paused((prev) => !prev)}
+							isRunning={playFirst && !panel1Paused}
+							hasStarted={panel1Time > 0}
+							onPauseToggle={() =>
+								playFirst ? setPanel1Paused((prev) => !prev) : startPanel1()
+							}
 						/>
 
 						<DualProgressPanel
 							label="Panel 2"
-							duration={duration}
-							maxMoney={maxMoney}
+							duration={panel2Config.duration}
+							maxMoney={panel2Config.maxMoney}
 							currentTime={panel2Time}
 							currentMoney={panel2Money}
 							isPaused={panel2Paused}
-							isRunning={isGlobalPlaying && !panel2Paused}
-							onPauseToggle={() => setPanel2Paused((prev) => !prev)}
+							isRunning={playSecond && !panel2Paused}
+							hasStarted={panel2Time > 0}
+							onPauseToggle={() =>
+								playSecond ? setPanel2Paused((prev) => !prev) : startPanel2()
+							}
 						/>
 					</Flex>
 
@@ -90,35 +105,49 @@ function App() {
 						direction={{ base: "column", md: "row" }}
 						gap={4}
 						w="100%"
-						align="center"
-						justify="center"
+						justifyContent="center"
+						align="flex-end"
 						flexWrap="wrap"
 					>
-						<Input
-							placeholder="Duración (segundos)"
-							type="number"
-							value={durationInput}
-							onChange={(e) => setDurationInput(e.target.value)}
-							isInvalid={isDurationInvalid}
-							variant="filled"
-							bg="white"
-							w={{ base: "100%", md: "33%" }}
-							rounded="md"
-						/>
+						<Flex direction="column" gap={1} w={{ base: "100%", md: "33%" }}>
+							<Text fontWeight="semibold">Tiempo</Text>
+							<Input
+								placeholder="Duración (segundos)"
+								type="number"
+								value={durationInput}
+								onChange={(e) => setDurationInput(e.target.value)}
+								isInvalid={isDurationInvalid}
+								variant="filled"
+								bg="white"
+								rounded="md"
+							/>
+						</Flex>
 
-						<Input
-							placeholder="Dinero máximo"
-							type="number"
-							value={maxMoneyInput}
-							onChange={(e) => setMaxMoneyInput(e.target.value)}
-							isInvalid={isMoneyInvalid}
-							variant="filled"
-							bg="white"
-							w={{ base: "100%", md: "33%" }}
-							rounded="md"
-						/>
+						<Flex direction="column" gap={1} w={{ base: "100%", md: "33%" }}>
+							<Text fontWeight="semibold">Dinero</Text>
+							<Input
+								placeholder="Dinero máximo"
+								type="number"
+								value={maxMoneyInput}
+								onChange={(e) => setMaxMoneyInput(e.target.value)}
+								isInvalid={isMoneyInvalid}
+								variant="filled"
+								bg="white"
+								rounded="md"
+							/>
+						</Flex>
 
-						{reset ? (
+						{bothRunning ? (
+							<Button
+								onClick={pauseAll}
+								colorScheme="red"
+								size="lg"
+								w={{ base: "100%", md: "33%" }}
+								leftIcon={<FaPause />}
+							>
+								Pausar ambos
+							</Button>
+						) : reset ? (
 							<Button
 								onClick={() => {
 									resetAll();
@@ -127,23 +156,10 @@ function App() {
 								colorScheme="red"
 								size="lg"
 								w={{ base: "100%", md: "33%" }}
-								shadow="md"
 							>
 								Reiniciar
 							</Button>
-						) : (
-							<Button
-								onClick={handlePlay}
-								colorScheme="teal"
-								size="lg"
-								w={{ base: "100%", md: "33%" }}
-								leftIcon={<FaPlay />}
-								isDisabled={isGlobalPlaying}
-								shadow="md"
-							>
-								Iniciar ambos procesos
-							</Button>
-						)}
+						) : null}
 					</Flex>
 
 					<SummaryModal
@@ -151,6 +167,8 @@ function App() {
 						onClose={() => {
 							onClose();
 							setReset(true);
+							setPlayFirst(false);
+							setPlaySecond(false);
 						}}
 						panel1={{ time: panel1Time, money: panel1Money }}
 						panel2={{ time: panel2Time, money: panel2Money }}
@@ -160,5 +178,3 @@ function App() {
 		</>
 	);
 }
-
-export default App;
