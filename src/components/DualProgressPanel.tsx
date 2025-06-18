@@ -8,7 +8,7 @@ import {
 	HStack,
 	Flex,
 } from "@chakra-ui/react";
-import { FaPlay, FaPause } from "react-icons/fa";
+import { FaPlay, FaPause, FaSync } from "react-icons/fa";
 
 type Props = {
 	label: string;
@@ -18,6 +18,7 @@ type Props = {
 	currentMoney: number;
 	isRunning: boolean;
 	hasStarted: boolean;
+	reset: () => void;
 	onPauseToggle: () => void;
 };
 
@@ -29,6 +30,7 @@ export default function DualProgressPanel({
 	currentMoney,
 	isRunning,
 	hasStarted,
+	reset,
 	onPauseToggle,
 }: Props) {
 	const progressTime = duration > 0 ? (currentTime / duration) * 100 : 0;
@@ -99,6 +101,15 @@ export default function DualProgressPanel({
 					>
 						{isRunning ? "Pausar" : hasStarted ? "Reanudar" : "Iniciar"}
 					</Button>
+					<Flex justifyContent="flex-end">
+						<Button
+							onClick={() => {
+								reset();
+							}}
+						>
+							<FaSync />
+						</Button>
+					</Flex>
 				</HStack>
 			</VStack>
 		</Box>

@@ -41,6 +41,18 @@ export default function useApp() {
 	const toast = useToast();
 	const tick = 100;
 
+	const resetFirstPanel = () => {
+		setPlayFirst(false);
+		setPanel1Time(0);
+		setPanel1Money(0);
+	};
+
+	const resetSecondPanel = () => {
+		setPlaySecond(false);
+		setPanel2Time(0);
+		setPanel2Money(0);
+	};
+
 	const resetAll = () => {
 		setPlayFirst(false);
 		setPlaySecond(false);
@@ -181,5 +193,7 @@ export default function useApp() {
 		startPanel1,
 		startPanel2,
 		pauseAll,
+		resetFirstPanel,
+		resetSecondPanel,
 	};
 }

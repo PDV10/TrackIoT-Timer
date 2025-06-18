@@ -45,6 +45,8 @@ export default function App() {
 		setReset,
 		resetAll,
 		onClose,
+		resetFirstPanel,
+		resetSecondPanel,
 	} = useApp();
 
 	const bothRunning = playFirst && playSecond;
@@ -80,6 +82,7 @@ export default function App() {
 							currentMoney={panel1Money}
 							isRunning={playFirst && !panel1Paused}
 							hasStarted={panel1Time > 0}
+							reset={resetFirstPanel}
 							onPauseToggle={() =>
 								playFirst ? setPanel1Paused((prev) => !prev) : startPanel1()
 							}
@@ -93,6 +96,7 @@ export default function App() {
 							currentMoney={panel2Money}
 							isRunning={playSecond && !panel2Paused}
 							hasStarted={panel2Time > 0}
+							reset={resetSecondPanel}
 							onPauseToggle={() =>
 								playSecond ? setPanel2Paused((prev) => !prev) : startPanel2()
 							}
