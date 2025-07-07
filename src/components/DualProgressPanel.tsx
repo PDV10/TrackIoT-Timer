@@ -27,6 +27,15 @@ export default function DualProgressPanel({
 	const progressTime = duration > 0 ? (currentTime / duration) * 100 : 0;
 	const progressMoney = maxMoney > 0 ? (currentMoney / maxMoney) * 100 : 0;
 
+	const formatTime = (totalSeconds: number) => {
+		const minutes = Math.floor(totalSeconds / 60);
+		const seconds = Math.floor(totalSeconds % 60);
+		if (minutes > 0) {
+			return `${minutes}:${seconds.toString().padStart(2, "0")}m`;
+		}
+		return `${totalSeconds.toFixed(1)}s`;
+	};
+
 	return (
 		<Box
 			w={{ base: "100%", md: "50%" }}
@@ -60,8 +69,14 @@ export default function DualProgressPanel({
 							hasStripe
 							isAnimated={isRunning}
 						/>
-						<Text mt={1} fontSize="sm" color="gray.600">
-							{currentTime.toFixed(1)}s
+						<Text
+							fontSize="sm"
+							color="gray.600"
+							whiteSpace="nowrap"
+							minW="20px"
+							textAlign="right"
+						>
+							{formatTime(currentTime)}
 						</Text>
 					</Flex>
 				</Box>
@@ -80,7 +95,13 @@ export default function DualProgressPanel({
 							hasStripe
 							isAnimated={isRunning}
 						/>
-						<Text fontSize="sm" color="gray.600" whiteSpace="nowrap">
+						<Text
+							fontSize="sm"
+							color="gray.600"
+							whiteSpace="nowrap"
+							minW="20px"
+							textAlign="right"
+						>
 							${currentMoney.toFixed(0)}
 						</Text>
 					</Flex>
