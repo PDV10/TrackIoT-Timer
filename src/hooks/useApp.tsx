@@ -1,6 +1,6 @@
 // hooks/useApp.ts
 import { useDisclosure, useToast } from "@chakra-ui/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function useApp() {
 	const [isSplashVisible, setIsSplashVisible] = useState(true);
