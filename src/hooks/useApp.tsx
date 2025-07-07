@@ -36,6 +36,7 @@ export default function useApp() {
 	const [reset, setReset] = useState(false);
 	const [isDurationInvalid, setIsDurationInvalid] = useState(false);
 	const [isMoneyInvalid, setIsMoneyInvalid] = useState(false);
+	const [openResumen, setOpenResumen] = useState(false);
 
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const toast = useToast();
@@ -62,6 +63,7 @@ export default function useApp() {
 		setPanel2Time(0);
 		setPanel1Money(0);
 		setPanel2Money(0);
+		setOpenResumen(false);
 	};
 
 	useEffect(() => {
@@ -105,7 +107,10 @@ export default function useApp() {
 	useEffect(() => {
 		const p1Done = panel1Paused || panel1Time >= panel1Config.duration;
 		const p2Done = panel2Paused || panel2Time >= panel2Config.duration;
-		if (playFirst && playSecond && p1Done && p2Done && !isOpen) onOpen();
+		if (playFirst && playSecond && p1Done && p2Done && !isOpen) {
+			onOpen();
+			setOpenResumen(true);
+		}
 	}, [
 		panel1Paused,
 		panel2Paused,
@@ -180,6 +185,7 @@ export default function useApp() {
 		reset,
 		isOpen,
 		isSplashVisible,
+		openResumen,
 		setDurationInput,
 		setMaxMoneyInput,
 		setPanel1Paused,
@@ -195,5 +201,6 @@ export default function useApp() {
 		pauseAll,
 		resetFirstPanel,
 		resetSecondPanel,
+		onOpen,
 	};
 }

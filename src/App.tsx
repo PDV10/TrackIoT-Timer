@@ -33,6 +33,7 @@ export default function App() {
 		panel1Config,
 		panel2Config,
 		isSplashVisible,
+		openResumen,
 		setDurationInput,
 		setMaxMoneyInput,
 		setPanel1Paused,
@@ -47,6 +48,7 @@ export default function App() {
 		onClose,
 		resetFirstPanel,
 		resetSecondPanel,
+		onOpen,
 	} = useApp();
 
 	const bothRunning = playFirst && playSecond;
@@ -75,7 +77,7 @@ export default function App() {
 						justifyContent="space-between"
 					>
 						<DualProgressPanel
-							label="Panel 1"
+							label="Panel Manual"
 							duration={panel1Config.duration}
 							maxMoney={panel1Config.maxMoney}
 							currentTime={panel1Time}
@@ -89,7 +91,7 @@ export default function App() {
 						/>
 
 						<DualProgressPanel
-							label="Panel 2"
+							label="Panel "
 							duration={panel2Config.duration}
 							maxMoney={panel2Config.maxMoney}
 							currentTime={panel2Time}
@@ -162,6 +164,18 @@ export default function App() {
 								Reiniciar
 							</Button>
 						) : null}
+
+						{openResumen && (
+							<Button
+								onClick={onOpen}
+								colorScheme="teal"
+								variant="solid"
+								size="lg"
+								w={{ base: "100%", md: "33%" }}
+							>
+								Ver resumen 📊
+							</Button>
+						)}
 					</Flex>
 
 					<SummaryModal

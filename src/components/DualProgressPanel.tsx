@@ -1,17 +1,8 @@
-// components/DualProgressPanel.tsx
-import {
-	Box,
-	Button,
-	Progress,
-	Text,
-	VStack,
-	HStack,
-	Flex,
-} from "@chakra-ui/react";
+import { Box, Button, Progress, Text, VStack, Flex } from "@chakra-ui/react";
 import { FaPlay, FaPause, FaSync } from "react-icons/fa";
 
 type Props = {
-	label: string;
+	label: string; // Ej: "Manual" o "TrackIoT"
 	duration: number;
 	maxMoney: number;
 	currentTime: number;
@@ -45,6 +36,10 @@ export default function DualProgressPanel({
 			boxShadow="md"
 			border="1px solid"
 			borderColor="gray.200"
+			display="flex"
+			flexDirection="column"
+			justifyContent="space-between"
+			h="100%"
 		>
 			<VStack spacing={6} align="stretch">
 				<Text fontSize="2xl" fontWeight="bold" color="gray.700">
@@ -90,28 +85,26 @@ export default function DualProgressPanel({
 						</Text>
 					</Flex>
 				</Box>
-
-				<HStack justifyContent="center" pt={2}>
-					<Button
-						onClick={onPauseToggle}
-						colorScheme={isRunning ? "red" : "green"}
-						leftIcon={isRunning ? <FaPause /> : <FaPlay />}
-						size="md"
-						shadow="sm"
-					>
-						{isRunning ? "Pausar" : hasStarted ? "Reanudar" : "Iniciar"}
-					</Button>
-					<Flex justifyContent="flex-end">
-						<Button
-							onClick={() => {
-								reset();
-							}}
-						>
-							<FaSync />
-						</Button>
-					</Flex>
-				</HStack>
 			</VStack>
+
+			<Flex justifyContent="space-between" alignItems="center" pt={6}>
+				{/* Espacio vacío a la izquierda para equilibrio */}
+				<Box w="48px" />
+				{/* Botón central */}
+				<Button
+					onClick={onPauseToggle}
+					colorScheme={isRunning ? "red" : "green"}
+					leftIcon={isRunning ? <FaPause /> : <FaPlay />}
+					size="md"
+					shadow="sm"
+				>
+					{isRunning ? "Pausar" : hasStarted ? "Reanudar" : "Iniciar"}
+				</Button>
+				{/* Botón a la derecha */}
+				<Button onClick={reset}>
+					<FaSync />
+				</Button>
+			</Flex>
 		</Box>
 	);
 }

@@ -1,97 +1,141 @@
 import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalCloseButton,
-  Text,
-  VStack,
-  HStack,
-  Button,
+	Modal,
+	ModalOverlay,
+	ModalContent,
+	ModalHeader,
+	ModalBody,
+	ModalCloseButton,
+	Text,
+	VStack,
+	HStack,
+	Button,
+	Divider,
 } from "@chakra-ui/react";
 
+import ComparisonChart from "./ComparisonChart"; // Ajustá el path si es necesario
+
 type PanelResult = {
-  time: number;
-  money: number;
+	time: number;
+	money: number;
 };
 
 type Props = {
-  isOpen: boolean;
-  onClose: () => void;
-  panel1: PanelResult;
-  panel2: PanelResult;
+	isOpen: boolean;
+	onClose: () => void;
+	panel1: PanelResult; // Manual
+	panel2: PanelResult; // TrackIoT
 };
 
 export default function SummaryModal({
-  isOpen,
-  onClose,
-  panel1,
-  panel2,
+	isOpen,
+	onClose,
+	panel1,
+	panel2,
 }: Props) {
-  const efficiency1 = panel1.time > 0 ? panel1.money / panel1.time : 0;
-  const efficiency2 = panel2.time > 0 ? panel2.money / panel2.time : 0;
+	// Indicadores de mejora (Manual = panel1, TrackIoT = panel2)
+	const reduccionTiempo = ((panel2.time - panel1.time) / panel1.time) * 100;
+	const ponderacionTiempo = (panel2.time / panel1.time) * 100;
+	const reduccionCosto = ((panel2.money - panel1.money) / panel1.money) * 100;
+	const ponderacionCosto = (panel2.money / panel1.money) * 100;
 
-  const isEqual = Math.abs(efficiency1 - efficiency2) < 0.01;
+	return (
+		<Modal isOpen={isOpen} onClose={onClose} isCentered size="lg">
+			<ModalOverlay />
+			<ModalContent bg="white" rounded="xl" shadow="xl">
+				<ModalHeader textAlign="center" fontWeight="bold" fontSize="xl">
+					📊 Resumen Comparativo
+				</ModalHeader>
+				<ModalCloseButton />
+				<ModalBody pb={6}>
+					<VStack spacing={4} align="stretch">
+						{/* Encabezados alineados */}
+						<HStack justify="space-between">
+							<Text w="40%" />
+							<Text fontWeight="bold" fontSize="md" w="30%" textAlign="center">
+								Manual
+							</Text>
+							<Text fontWeight="bold" fontSize="md" w="30%" textAlign="center">
+								TrackIOT
+							</Text>
+						</HStack>
 
-  const winner =
-    !isEqual
-      ? efficiency1 > efficiency2
-        ? "Panel 1"
-        : "Panel 2"
-      : null;
+						{/* Tiempo */}
+						<HStack justify="space-between">
+							<Text w="40%">⏱ Tiempo:</Text>
+							<Text fontWeight="semibold" w="30%" textAlign="center">
+								{panel1.time.toFixed(1)}s
+							</Text>
+							<Text fontWeight="semibold" w="30%" textAlign="center">
+								{panel2.time.toFixed(1)}s
+							</Text>
+						</HStack>
 
-  const percentDiff = !isEqual
-    ? (Math.abs(efficiency1 - efficiency2) / Math.min(efficiency1, efficiency2)) * 100
-    : 0;
+						{/* Costo */}
+						<HStack justify="space-between">
+							<Text w="40%">💰 Costo:</Text>
+							<Text fontWeight="semibold" w="30%" textAlign="center">
+								${panel1.money.toFixed(0)}
+							</Text>
+							<Text fontWeight="semibold" w="30%" textAlign="center">
+								${panel2.money.toFixed(0)}
+							</Text>
+						</HStack>
 
-  const verdict = winner
-    ? `🏆 ${winner} fue más eficiente en un ${percentDiff.toFixed(1)}% comparado con el otro panel.`
-    : "🤝 Ambos paneles tuvieron el mismo rendimiento.";
+						<Divider pt={2} />
 
-  return (
-    <Modal isOpen={isOpen} onClose={onClose} isCentered size="lg">
-      <ModalOverlay />
-      <ModalContent bg="white" rounded="xl" shadow="xl">
-        <ModalHeader textAlign="center">Resumen comparativo</ModalHeader>
-        <ModalCloseButton />
-        <ModalBody pb={6}>
-          <VStack spacing={5} align="stretch">
-            <HStack justify="space-between">
-              <Text fontWeight="bold" fontSize="lg">Panel 1</Text>
-              <Text fontWeight="bold" fontSize="lg">Panel 2</Text>
-            </HStack>
+						{/* Indicadores adicionales */}
+						<VStack spacing={2} pt={2} align="stretch">
+							<Text fontWeight="bold" textAlign="center" fontSize="md">
+								📉 Indicadores de Mejora TrackIoT
+							</Text>
 
-            <HStack justify="space-between">
-              <Text>⏱ Tiempo: {panel1.time.toFixed(1)}s</Text>
-              <Text>⏱ Tiempo: {panel2.time.toFixed(1)}s</Text>
-            </HStack>
+							<HStack justify="space-between">
+								<Text>⏱ Reducción del Tiempo Total:</Text>
+								<Text fontWeight="bold" color="teal.600">
+									{reduccionTiempo.toFixed(1)}%
+								</Text>
+							</HStack>
 
-            <HStack justify="space-between">
-              <Text>💰 Dinero: ${panel1.money.toFixed(0)}</Text>
-              <Text>💰 Dinero: ${panel2.money.toFixed(0)}</Text>
-            </HStack>
+							<HStack justify="space-between">
+								<Text>⏱ Ponderación del Tiempo Total:</Text>
+								<Text fontWeight="bold" color="teal.600">
+									{ponderacionTiempo.toFixed(1)}%
+								</Text>
+							</HStack>
 
-            <HStack justify="space-between">
-              <Text>📊 Rendimiento: ${efficiency1.toFixed(3)}/s</Text>
-              <Text>📊 Rendimiento: ${efficiency2.toFixed(3)}/s</Text>
-            </HStack>
+							<HStack justify="space-between">
+								<Text>💰 Reducción del Costo Total:</Text>
+								<Text fontWeight="bold" color="teal.600">
+									{reduccionCosto.toFixed(1)}%
+								</Text>
+							</HStack>
 
-            <Text textAlign="center" pt={4} fontWeight="medium">
-              {verdict}
-            </Text>
+							<HStack justify="space-between">
+								<Text>💰 Ponderación del Costo Total:</Text>
+								<Text fontWeight="bold" color="teal.600">
+									{ponderacionCosto.toFixed(1)}%
+								</Text>
+							</HStack>
+						</VStack>
 
-            <Button
-              colorScheme="teal"
-              variant="outline"
-              onClick={onClose}
-              alignSelf="center"
-            >
-              Cerrar resumen
-            </Button>
-          </VStack>
-        </ModalBody>
-      </ModalContent>
-    </Modal>
-  );
+						{/* Gráfico */}
+						<VStack align="stretch" w="100%" h="250px" mb={5}>
+							<ComparisonChart panel1={panel1} panel2={panel2} />
+						</VStack>
+
+						{/* Botón */}
+						<Button
+							colorScheme="teal"
+							variant="solid"
+							onClick={onClose}
+							alignSelf="center"
+							mt={4}
+						>
+							Cerrar resumen
+						</Button>
+					</VStack>
+				</ModalBody>
+			</ModalContent>
+		</Modal>
+	);
 }
