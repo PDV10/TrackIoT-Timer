@@ -91,7 +91,7 @@ export default function App() {
 						/>
 
 						<DualProgressPanel
-							label="Panel "
+							label="Panel Trackiot"
 							duration={panel2Config.duration}
 							maxMoney={panel2Config.maxMoney}
 							currentTime={panel2Time}

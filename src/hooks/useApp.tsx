@@ -1,6 +1,6 @@
 // hooks/useApp.ts
 import { useDisclosure, useToast } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 export default function useApp() {
 	const [isSplashVisible, setIsSplashVisible] = useState(true);
@@ -41,17 +41,21 @@ export default function useApp() {
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const toast = useToast();
 	const tick = 100;
+	const panel1StartRef = useRef<number | null>(null);
+	const panel2StartRef = useRef<number | null>(null);
 
 	const resetFirstPanel = () => {
 		setPlayFirst(false);
 		setPanel1Time(0);
 		setPanel1Money(0);
+		panel1StartRef.current = null;
 	};
 
 	const resetSecondPanel = () => {
 		setPlaySecond(false);
 		setPanel2Time(0);
 		setPanel2Money(0);
+		panel2StartRef.current = null;
 	};
 
 	const resetAll = () => {
@@ -64,45 +68,51 @@ export default function useApp() {
 		setPanel1Money(0);
 		setPanel2Money(0);
 		setOpenResumen(false);
+		panel1StartRef.current = null;
+		panel2StartRef.current = null;
 	};
 
 	useEffect(() => {
-		let timer1: number | null = null;
-		if (playFirst && !panel1Paused && panel1Time < panel1Config.duration) {
-			timer1 = window.setInterval(() => {
-				setPanel1Time((prev) =>
-					Math.min(prev + tick / 1000, panel1Config.duration),
-				);
-				setPanel1Money((prev) =>
+		let interval: number | undefined;
+
+		if (playFirst && !panel1Paused && panel1StartRef.current !== null) {
+			interval = window.setInterval(() => {
+				const now = Date.now();
+				const elapsedSec = (now - panel1StartRef.current!) / 1000;
+
+				setPanel1Time(Math.min(elapsedSec, panel1Config.duration));
+				setPanel1Money(
 					Math.min(
-						prev +
-							(panel1Config.maxMoney / panel1Config.duration) * (tick / 1000),
+						(panel1Config.maxMoney / panel1Config.duration) * elapsedSec,
 						panel1Config.maxMoney,
 					),
 				);
 			}, tick);
 		}
-		return () => clearInterval(timer1!);
-	}, [playFirst, panel1Paused, panel1Time, panel1Config]);
+
+		return () => clearInterval(interval);
+	}, [playFirst, panel1Paused, panel1Config]);
 
 	useEffect(() => {
-		let timer2: number | null = null;
-		if (playSecond && !panel2Paused && panel2Time < panel2Config.duration) {
-			timer2 = window.setInterval(() => {
-				setPanel2Time((prev) =>
-					Math.min(prev + tick / 1000, panel2Config.duration),
-				);
-				setPanel2Money((prev) =>
+		let interval: number | undefined;
+
+		if (playSecond && !panel2Paused && panel2StartRef.current !== null) {
+			interval = window.setInterval(() => {
+				const now = Date.now();
+				const elapsedSec = (now - panel2StartRef.current!) / 1000;
+
+				setPanel2Time(Math.min(elapsedSec, panel2Config.duration));
+				setPanel2Money(
 					Math.min(
-						prev +
-							(panel2Config.maxMoney / panel2Config.duration) * (tick / 1000),
+						(panel2Config.maxMoney / panel2Config.duration) * elapsedSec,
 						panel2Config.maxMoney,
 					),
 				);
 			}, tick);
 		}
-		return () => clearInterval(timer2!);
-	}, [playSecond, panel2Paused, panel2Time, panel2Config]);
+
+		return () => clearInterval(interval);
+	}, [playSecond, panel2Paused, panel2Config]);
 
 	useEffect(() => {
 		const p1Done = panel1Paused || panel1Time >= panel1Config.duration;
@@ -147,6 +157,7 @@ export default function useApp() {
 			duration: Number(durationInput),
 			maxMoney: Number(maxMoneyInput),
 		});
+		panel1StartRef.current = Date.now();
 		setPlayFirst(true);
 		setPanel1Paused(false);
 	};
@@ -157,6 +168,7 @@ export default function useApp() {
 			duration: Number(durationInput),
 			maxMoney: Number(maxMoneyInput),
 		});
+		panel2StartRef.current = Date.now();
 		setPlaySecond(true);
 		setPanel2Paused(false);
 	};
