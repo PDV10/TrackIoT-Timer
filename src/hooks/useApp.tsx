@@ -1,4 +1,3 @@
-// hooks/useApp.ts
 import { useDisclosure, useToast } from "@chakra-ui/react";
 import { useEffect, useState, useRef } from "react";
 
@@ -24,7 +23,6 @@ export default function useApp() {
 
 	const [playFirst, setPlayFirst] = useState(false);
 	const [playSecond, setPlaySecond] = useState(false);
-
 	const [panel1Paused, setPanel1Paused] = useState(true);
 	const [panel2Paused, setPanel2Paused] = useState(true);
 
@@ -41,14 +39,18 @@ export default function useApp() {
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const toast = useToast();
 	const tick = 100;
+
 	const panel1StartRef = useRef<number | null>(null);
 	const panel2StartRef = useRef<number | null>(null);
+	const [panel1ElapsedBeforePause, setPanel1ElapsedBeforePause] = useState(0);
+	const [panel2ElapsedBeforePause, setPanel2ElapsedBeforePause] = useState(0);
 
 	const resetFirstPanel = () => {
 		setPlayFirst(false);
 		setPanel1Time(0);
 		setPanel1Money(0);
 		panel1StartRef.current = null;
+		setPanel1ElapsedBeforePause(0);
 	};
 
 	const resetSecondPanel = () => {
@@ -56,6 +58,7 @@ export default function useApp() {
 		setPanel2Time(0);
 		setPanel2Money(0);
 		panel2StartRef.current = null;
+		setPanel2ElapsedBeforePause(0);
 	};
 
 	const resetAll = () => {
@@ -68,18 +71,19 @@ export default function useApp() {
 		setPanel1Money(0);
 		setPanel2Money(0);
 		setOpenResumen(false);
+		setPanel1ElapsedBeforePause(0);
+		setPanel2ElapsedBeforePause(0);
 		panel1StartRef.current = null;
 		panel2StartRef.current = null;
 	};
 
 	useEffect(() => {
 		let interval: number | undefined;
-
 		if (playFirst && !panel1Paused && panel1StartRef.current !== null) {
 			interval = window.setInterval(() => {
 				const now = Date.now();
-				const elapsedSec = (now - panel1StartRef.current!) / 1000;
-
+				const elapsedSec =
+					panel1ElapsedBeforePause + (now - panel1StartRef.current!) / 1000;
 				setPanel1Time(Math.min(elapsedSec, panel1Config.duration));
 				setPanel1Money(
 					Math.min(
@@ -89,18 +93,16 @@ export default function useApp() {
 				);
 			}, tick);
 		}
-
 		return () => clearInterval(interval);
-	}, [playFirst, panel1Paused, panel1Config]);
+	}, [playFirst, panel1Paused, panel1Config, panel1ElapsedBeforePause]);
 
 	useEffect(() => {
 		let interval: number | undefined;
-
 		if (playSecond && !panel2Paused && panel2StartRef.current !== null) {
 			interval = window.setInterval(() => {
 				const now = Date.now();
-				const elapsedSec = (now - panel2StartRef.current!) / 1000;
-
+				const elapsedSec =
+					panel2ElapsedBeforePause + (now - panel2StartRef.current!) / 1000;
 				setPanel2Time(Math.min(elapsedSec, panel2Config.duration));
 				setPanel2Money(
 					Math.min(
@@ -110,9 +112,8 @@ export default function useApp() {
 				);
 			}, tick);
 		}
-
 		return () => clearInterval(interval);
-	}, [playSecond, panel2Paused, panel2Config]);
+	}, [playSecond, panel2Paused, panel2Config, panel2ElapsedBeforePause]);
 
 	useEffect(() => {
 		const p1Done = panel1Paused || panel1Time >= panel1Config.duration;
@@ -128,6 +129,10 @@ export default function useApp() {
 		panel2Time,
 		panel1Config.duration,
 		panel2Config.duration,
+		playFirst,
+		playSecond,
+		isOpen,
+		onOpen,
 	]);
 
 	const validateInputs = () => {
@@ -173,9 +178,39 @@ export default function useApp() {
 		setPanel2Paused(false);
 	};
 
-	const pauseAll = () => {
+	const pausePanel1 = () => {
+		if (panel1StartRef.current !== null) {
+			const now = Date.now();
+			const elapsed = (now - panel1StartRef.current) / 1000;
+			setPanel1ElapsedBeforePause((prev) => prev + elapsed);
+			panel1StartRef.current = null;
+		}
 		setPanel1Paused(true);
+	};
+
+	const pausePanel2 = () => {
+		if (panel2StartRef.current !== null) {
+			const now = Date.now();
+			const elapsed = (now - panel2StartRef.current) / 1000;
+			setPanel2ElapsedBeforePause((prev) => prev + elapsed);
+			panel2StartRef.current = null;
+		}
 		setPanel2Paused(true);
+	};
+
+	const resumePanel1 = () => {
+		panel1StartRef.current = Date.now();
+		setPanel1Paused(false);
+	};
+
+	const resumePanel2 = () => {
+		panel2StartRef.current = Date.now();
+		setPanel2Paused(false);
+	};
+
+	const pauseAll = () => {
+		pausePanel1();
+		pausePanel2();
 		setReset(true);
 	};
 
@@ -200,8 +235,6 @@ export default function useApp() {
 		openResumen,
 		setDurationInput,
 		setMaxMoneyInput,
-		setPanel1Paused,
-		setPanel2Paused,
 		setPlayFirst,
 		setPlaySecond,
 		setReset,
@@ -214,5 +247,9 @@ export default function useApp() {
 		resetFirstPanel,
 		resetSecondPanel,
 		onOpen,
+		pausePanel1,
+		resumePanel1,
+		pausePanel2,
+		resumePanel2,
 	};
 }

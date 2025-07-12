@@ -36,6 +36,8 @@ export default function DualProgressPanel({
 		return `${totalSeconds.toFixed(1)}s`;
 	};
 
+	const isCompleted = currentTime >= duration;
+
 	return (
 		<Box
 			w={{ base: "100%", md: "50%" }}
@@ -97,19 +99,19 @@ export default function DualProgressPanel({
 			</VStack>
 
 			<Flex justifyContent="space-between" alignItems="center" pt={6}>
-				{/* Espacio vacío a la izquierda para equilibrio */}
 				<Box w="48px" />
-				{/* Botón central */}
-				<Button
-					onClick={onPauseToggle}
-					colorScheme={isRunning ? "red" : "green"}
-					leftIcon={isRunning ? <FaPause /> : <FaPlay />}
-					size="md"
-					shadow="sm"
-				>
-					{isRunning ? "Pausar" : hasStarted ? "Reanudar" : "Iniciar"}
-				</Button>
-				{/* Botón a la derecha */}
+				{!isCompleted && (
+					<Button
+						onClick={onPauseToggle}
+						colorScheme={isRunning ? "red" : "green"}
+						leftIcon={isRunning ? <FaPause /> : <FaPlay />}
+						size="md"
+						shadow="sm"
+					>
+						{isRunning ? "Pausar" : hasStarted ? "Reanudar" : "Iniciar"}
+					</Button>
+				)}
+
 				<Button onClick={reset}>
 					<FaSync />
 				</Button>

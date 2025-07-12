@@ -36,8 +36,6 @@ export default function App() {
 		openResumen,
 		setDurationInput,
 		setMaxMoneyInput,
-		setPanel1Paused,
-		setPanel2Paused,
 		startPanel1,
 		startPanel2,
 		setPlayFirst,
@@ -49,6 +47,10 @@ export default function App() {
 		resetFirstPanel,
 		resetSecondPanel,
 		onOpen,
+		pausePanel1,
+		resumePanel1,
+		pausePanel2,
+		resumePanel2,
 	} = useApp();
 
 	const bothRunning = playFirst && playSecond;
@@ -85,9 +87,11 @@ export default function App() {
 							isRunning={playFirst && !panel1Paused}
 							hasStarted={panel1Time > 0}
 							reset={resetFirstPanel}
-							onPauseToggle={() =>
-								playFirst ? setPanel1Paused((prev) => !prev) : startPanel1()
-							}
+							onPauseToggle={() => {
+								if (!playFirst) return startPanel1();
+								if (panel1Paused) return resumePanel1();
+								return pausePanel1();
+							}}
 						/>
 
 						<DualProgressPanel
@@ -99,9 +103,11 @@ export default function App() {
 							isRunning={playSecond && !panel2Paused}
 							hasStarted={panel2Time > 0}
 							reset={resetSecondPanel}
-							onPauseToggle={() =>
-								playSecond ? setPanel2Paused((prev) => !prev) : startPanel2()
-							}
+							onPauseToggle={() => {
+								if (!playSecond) return startPanel2();
+								if (panel2Paused) return resumePanel2();
+								return pausePanel2();
+							}}
 						/>
 					</Flex>
 

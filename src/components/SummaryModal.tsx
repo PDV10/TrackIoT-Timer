@@ -36,7 +36,6 @@ export default function SummaryModal({
 	const reduccionTiempo = ((panel2.time - panel1.time) / panel1.time) * 100;
 	const ponderacionTiempo = (panel2.time / panel1.time) * 100;
 	const reduccionCosto = ((panel2.money - panel1.money) / panel1.money) * 100;
-	const ponderacionCosto = (panel2.money / panel1.money) * 100;
 
 	return (
 		<Modal isOpen={isOpen} onClose={onClose} isCentered size="lg">
@@ -81,6 +80,27 @@ export default function SummaryModal({
 							</Text>
 						</HStack>
 
+						{/* Stock */}
+
+						<HStack justify="space-between">
+							<Text w="40%">📊 Stock:</Text>
+							<Text
+								fontWeight="semibold"
+								w="30%"
+								textAlign="center"
+								color="red.200"
+							>
+								19/20
+							</Text>
+							<Text
+								fontWeight="semibold"
+								w="30%"
+								textAlign="center"
+								color="green.200"
+							>
+								20/20
+							</Text>
+						</HStack>
 						<Divider pt={2} />
 
 						{/* Indicadores adicionales */}
@@ -107,13 +127,6 @@ export default function SummaryModal({
 								<Text>💰 Reducción del Costo Total:</Text>
 								<Text fontWeight="bold" color="teal.600">
 									{reduccionCosto.toFixed(1)}%
-								</Text>
-							</HStack>
-
-							<HStack justify="space-between">
-								<Text>💰 Ponderación del Costo Total:</Text>
-								<Text fontWeight="bold" color="teal.600">
-									{ponderacionCosto.toFixed(1)}%
 								</Text>
 							</HStack>
 						</VStack>
