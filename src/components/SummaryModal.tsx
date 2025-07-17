@@ -8,7 +8,6 @@ import {
 	Text,
 	VStack,
 	HStack,
-	Button,
 	Divider,
 } from "@chakra-ui/react";
 
