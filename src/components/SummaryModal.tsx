@@ -12,7 +12,7 @@ import {
 	Divider,
 } from "@chakra-ui/react";
 
-import ComparisonChart from "./ComparisonChart"; // Ajustá el path si es necesario
+import ComparisonChart from "./ComparisonChart";
 
 type PanelResult = {
 	time: number;
@@ -34,7 +34,6 @@ export default function SummaryModal({
 }: Props) {
 	// Indicadores de mejora (Manual = panel1, TrackIoT = panel2)
 	const reduccionTiempo = ((panel2.time - panel1.time) / panel1.time) * 100;
-	const ponderacionTiempo = (panel2.time / panel1.time) * 100;
 	const reduccionCosto = ((panel2.money - panel1.money) / panel1.money) * 100;
 
 	return (
@@ -117,9 +116,9 @@ export default function SummaryModal({
 							</HStack>
 
 							<HStack justify="space-between">
-								<Text>⏱ Ponderación del Tiempo Total:</Text>
+								<Text>⚖ Eficiencia control stock :</Text>
 								<Text fontWeight="bold" color="teal.600">
-									{ponderacionTiempo.toFixed(1)}%
+									M 95% - T 100%
 								</Text>
 							</HStack>
 
@@ -132,20 +131,9 @@ export default function SummaryModal({
 						</VStack>
 
 						{/* Gráfico */}
-						<VStack align="stretch" w="100%" h="250px" mb={5}>
+						<VStack align="stretch" w="100%" h="250px" mb={12}>
 							<ComparisonChart panel1={panel1} panel2={panel2} />
 						</VStack>
-
-						{/* Botón */}
-						<Button
-							colorScheme="teal"
-							variant="solid"
-							onClick={onClose}
-							alignSelf="center"
-							mt={4}
-						>
-							Cerrar resumen
-						</Button>
 					</VStack>
 				</ModalBody>
 			</ModalContent>

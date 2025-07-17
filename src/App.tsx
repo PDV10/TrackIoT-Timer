@@ -67,9 +67,9 @@ export default function App() {
 						objectFit="contain"
 					/>
 				</Flex>
-				<VStack spacing={8} maxW="1280px" mx="auto">
+				<VStack spacing={8} maxW="1440px" mx="auto">
 					<Heading size="lg" color="gray.700" textAlign="center">
-						Comparador de Progreso
+						Analisis Control de Activos
 					</Heading>
 
 					<Flex
@@ -79,7 +79,7 @@ export default function App() {
 						justifyContent="space-between"
 					>
 						<DualProgressPanel
-							label="Panel Manual"
+							label="Control de Inventario Manual"
 							duration={panel1Config.duration}
 							maxMoney={panel1Config.maxMoney}
 							currentTime={panel1Time}
@@ -95,7 +95,7 @@ export default function App() {
 						/>
 
 						<DualProgressPanel
-							label="Panel Trackiot"
+							label="Control de Inventario Trackiot"
 							duration={panel2Config.duration}
 							maxMoney={panel2Config.maxMoney}
 							currentTime={panel2Time}
