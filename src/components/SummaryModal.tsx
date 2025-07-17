@@ -31,9 +31,8 @@ export default function SummaryModal({
 	panel1,
 	panel2,
 }: Props) {
-	// Indicadores de mejora (Manual = panel1, TrackIoT = panel2)
-	const reduccionTiempo = ((panel2.time - panel1.time) / panel1.time) * 100;
-	const reduccionCosto = ((panel2.money - panel1.money) / panel1.money) * 100;
+	const reduccionTiempo =
+		((panel1.time - panel2.time) / panel1.time) * 100 || 0;
 
 	return (
 		<Modal isOpen={isOpen} onClose={onClose} isCentered size="lg">
@@ -118,13 +117,6 @@ export default function SummaryModal({
 								<Text>⚖ Eficiencia control stock :</Text>
 								<Text fontWeight="bold" color="teal.600">
 									M 95% - T 100%
-								</Text>
-							</HStack>
-
-							<HStack justify="space-between">
-								<Text>💰 Reducción del Costo Total:</Text>
-								<Text fontWeight="bold" color="teal.600">
-									{reduccionCosto.toFixed(1)}%
 								</Text>
 							</HStack>
 						</VStack>

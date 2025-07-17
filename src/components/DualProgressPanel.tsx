@@ -2,9 +2,7 @@ import { Box, Button, Progress, Text, VStack, Flex } from "@chakra-ui/react";
 import { FaPlay, FaPause, FaSync } from "react-icons/fa";
 
 type Props = {
-	label: string; // Ej: "Manual" o "TrackIoT"
-	duration: number;
-	maxMoney: number;
+	label: string;
 	currentTime: number;
 	currentMoney: number;
 	isRunning: boolean;
@@ -13,10 +11,10 @@ type Props = {
 	onPauseToggle: () => void;
 };
 
+const FIXED_DURATION = 3600;
+
 export default function DualProgressPanel({
 	label,
-	duration,
-	maxMoney,
 	currentTime,
 	currentMoney,
 	isRunning,
@@ -24,19 +22,15 @@ export default function DualProgressPanel({
 	reset,
 	onPauseToggle,
 }: Props) {
-	const progressTime = duration > 0 ? (currentTime / duration) * 100 : 0;
-	const progressMoney = maxMoney > 0 ? (currentMoney / maxMoney) * 100 : 0;
-
+	const progressTime = (currentTime / FIXED_DURATION) * 100;
+	const progressMoney = (currentMoney / 27000) * 100;
 	const formatTime = (totalSeconds: number) => {
 		const minutes = Math.floor(totalSeconds / 60);
 		const seconds = Math.floor(totalSeconds % 60);
-		if (minutes > 0) {
-			return `${minutes}:${seconds.toString().padStart(2, "0")}m`;
-		}
-		return `${totalSeconds.toFixed(1)}s`;
+		return `${minutes}:${seconds.toString().padStart(2, "0")}m`;
 	};
 
-	const isCompleted = currentTime >= duration;
+	const isCompleted = currentTime >= FIXED_DURATION;
 
 	return (
 		<Box
@@ -64,14 +58,14 @@ export default function DualProgressPanel({
 					<Flex alignItems="center" gap={4}>
 						<Progress
 							flex="1"
-							value={progressTime}
+							value={progressTime / 3}
 							colorScheme="blue"
 							height="20px"
 							rounded="md"
 							hasStripe
 							isAnimated={isRunning}
 						/>
-						<Text mt={1} fontSize="sm" color="gray.600">
+						<Text mt={1} fontSize="sm" color="gray.600" whiteSpace="nowrap">
 							{formatTime(currentTime)}
 						</Text>
 					</Flex>
@@ -79,7 +73,7 @@ export default function DualProgressPanel({
 
 				<Box>
 					<Text fontSize="sm" mb={2} color="gray.500">
-						💰 Dinero
+						💰 Costo Acumulado
 					</Text>
 					<Flex alignItems="center" gap={4}>
 						<Progress
