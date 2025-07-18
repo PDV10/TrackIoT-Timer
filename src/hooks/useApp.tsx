@@ -3,36 +3,46 @@ import { useEffect, useState, useRef } from "react";
 
 export default function useApp() {
 	const FIXED_DURATION = 3600;
+	const tick = 100;
 
+	// Splash
 	const [isSplashVisible, setIsSplashVisible] = useState(true);
 	useEffect(() => {
 		const timeout = setTimeout(() => setIsSplashVisible(false), 4500);
 		return () => clearTimeout(timeout);
 	}, []);
 
+	// Inputs
 	const [durationInput, setDurationInput] = useState("1");
 	const [maxMoneyInput, setMaxMoneyInput] = useState("7");
+	const [isDurationInvalid, setIsDurationInvalid] = useState(false);
+	const [isMoneyInvalid, setIsMoneyInvalid] = useState(false);
 
+	// Estados de ejecución
 	const [playFirst, setPlayFirst] = useState(false);
 	const [playSecond, setPlaySecond] = useState(false);
 	const [panel1Paused, setPanel1Paused] = useState(true);
 	const [panel2Paused, setPanel2Paused] = useState(true);
 
+	// Valores congelados
+	const [panel1MoneyStep, setPanel1MoneyStep] = useState(0);
+	const [panel1IntervalSec, setPanel1IntervalSec] = useState(0);
+	const [panel2MoneyStep, setPanel2MoneyStep] = useState(0);
+	const [panel2IntervalSec, setPanel2IntervalSec] = useState(0);
+
+	// Progreso
 	const [panel1Time, setPanel1Time] = useState(0);
 	const [panel2Time, setPanel2Time] = useState(0);
 	const [panel1Money, setPanel1Money] = useState(0);
 	const [panel2Money, setPanel2Money] = useState(0);
 
+	// Control
 	const [reset, setReset] = useState(false);
-	const [isDurationInvalid, setIsDurationInvalid] = useState(false);
-	const [isMoneyInvalid, setIsMoneyInvalid] = useState(false);
 	const [openResumen, setOpenResumen] = useState(false);
-
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const toast = useToast();
-	const tick = 100;
 
-	// Refs y estados auxiliares
+	// Refs y pausas
 	const panel1StartRef = useRef<number | null>(null);
 	const panel2StartRef = useRef<number | null>(null);
 	const [panel1ElapsedBeforePause, setPanel1ElapsedBeforePause] = useState(0);
@@ -41,13 +51,13 @@ export default function useApp() {
 	const resetTimers = () => {
 		setPanel1Time(0);
 		setPanel1Money(0);
-		panel1StartRef.current = null;
 		setPanel1ElapsedBeforePause(0);
+		panel1StartRef.current = null;
 
 		setPanel2Time(0);
 		setPanel2Money(0);
-		panel2StartRef.current = null;
 		setPanel2ElapsedBeforePause(0);
+		panel2StartRef.current = null;
 	};
 
 	const resetAll = () => {
@@ -61,21 +71,23 @@ export default function useApp() {
 
 	const resetFirstPanel = () => {
 		setPlayFirst(false);
-		panel1StartRef.current = null;
+		setPanel1Paused(true);
 		setPanel1Time(0);
 		setPanel1Money(0);
 		setPanel1ElapsedBeforePause(0);
+		panel1StartRef.current = null;
 	};
 
 	const resetSecondPanel = () => {
 		setPlaySecond(false);
-		panel2StartRef.current = null;
+		setPanel2Paused(true);
 		setPanel2Time(0);
 		setPanel2Money(0);
 		setPanel2ElapsedBeforePause(0);
+		panel2StartRef.current = null;
 	};
 
-	// 🔁 useEffect panel 1
+	// Panel 1
 	useEffect(() => {
 		let interval: number | undefined;
 		if (playFirst && !panel1Paused && panel1StartRef.current !== null) {
@@ -83,10 +95,11 @@ export default function useApp() {
 				const now = Date.now();
 				const elapsedSec =
 					panel1ElapsedBeforePause + (now - panel1StartRef.current!) / 1000;
+
 				setPanel1Time(Math.min(elapsedSec, FIXED_DURATION));
 
-				const intervals = Math.floor(elapsedSec / Number(durationInput));
-				const total = intervals * Number(maxMoneyInput);
+				const intervals = Math.floor(elapsedSec / panel1IntervalSec);
+				const total = intervals * panel1MoneyStep;
 				setPanel1Money(Math.min(total, Number.MAX_SAFE_INTEGER));
 			}, tick);
 		}
@@ -95,11 +108,11 @@ export default function useApp() {
 		playFirst,
 		panel1Paused,
 		panel1ElapsedBeforePause,
-		durationInput,
-		maxMoneyInput,
+		panel1IntervalSec,
+		panel1MoneyStep,
 	]);
 
-	// 🔁 useEffect panel 2
+	// Panel 2
 	useEffect(() => {
 		let interval: number | undefined;
 		if (playSecond && !panel2Paused && panel2StartRef.current !== null) {
@@ -107,10 +120,11 @@ export default function useApp() {
 				const now = Date.now();
 				const elapsedSec =
 					panel2ElapsedBeforePause + (now - panel2StartRef.current!) / 1000;
+
 				setPanel2Time(Math.min(elapsedSec, FIXED_DURATION));
 
-				const intervals = Math.floor(elapsedSec / Number(durationInput));
-				const total = intervals * Number(maxMoneyInput);
+				const intervals = Math.floor(elapsedSec / panel2IntervalSec);
+				const total = intervals * panel2MoneyStep;
 				setPanel2Money(Math.min(total, Number.MAX_SAFE_INTEGER));
 			}, tick);
 		}
@@ -119,11 +133,11 @@ export default function useApp() {
 		playSecond,
 		panel2Paused,
 		panel2ElapsedBeforePause,
-		durationInput,
-		maxMoneyInput,
+		panel2IntervalSec,
+		panel2MoneyStep,
 	]);
 
-	// 🧠 Finalización
+	// Abrir resumen automáticamente
 	useEffect(() => {
 		const p1Done = panel1Paused || panel1Time >= FIXED_DURATION;
 		const p2Done = panel2Paused || panel2Time >= FIXED_DURATION;
@@ -142,7 +156,6 @@ export default function useApp() {
 		onOpen,
 	]);
 
-	// ✅ Validación
 	const validateInputs = () => {
 		const intervalValid = Number(durationInput) > 0;
 		const moneyValid = Number(maxMoneyInput) > 0;
@@ -162,9 +175,10 @@ export default function useApp() {
 		return true;
 	};
 
-	// 🔁 Start & Pause
 	const startPanel1 = () => {
 		if (!validateInputs()) return;
+		setPanel1MoneyStep(Number(maxMoneyInput));
+		setPanel1IntervalSec(Number(durationInput));
 		panel1StartRef.current = Date.now();
 		setPlayFirst(true);
 		setPanel1Paused(false);
@@ -172,6 +186,8 @@ export default function useApp() {
 
 	const startPanel2 = () => {
 		if (!validateInputs()) return;
+		setPanel2MoneyStep(Number(maxMoneyInput));
+		setPanel2IntervalSec(Number(durationInput));
 		panel2StartRef.current = Date.now();
 		setPlaySecond(true);
 		setPanel2Paused(false);

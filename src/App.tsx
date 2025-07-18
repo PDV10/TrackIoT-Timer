@@ -52,6 +52,10 @@ export default function App() {
 	} = useApp();
 
 	const bothRunning = playFirst && playSecond;
+	const anyPanelItsRunning = !(
+		(playFirst && !panel1Paused) ||
+		(playSecond && !panel2Paused)
+	);
 
 	return (
 		<>
@@ -202,6 +206,7 @@ export default function App() {
 									variant="solid"
 									size="lg"
 									w={{ base: "100%", md: "33%" }}
+									isDisabled={!anyPanelItsRunning}
 								>
 									Ver resumen 📊
 								</Button>
